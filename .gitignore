@@ -1,0 +1,35 @@
+# Directorios y archivos generados por el sistema operativo
+__pycache__
+*.pyc
+*.pyo
+.DS_Store
+
+# Directorio de entorno virtual (si estás usando uno)
+venv/
+env/
+env*/
+*.idea/
+
+# Archivos de configuración específicos del proyecto
+settings/local_settings.py
+
+# Archivos de registro (logs)
+*.log
+
+# Archivos de bases de datos SQLite (no los incluyas si usas otra base de datos)
+db.sqlite3
+
+# Archivos estáticos y archivos de medios generados
+/static/
+/media/
+
+# Archivos de caché generados por Django
+__pycache__/
+*.cache
+
+# Archivo de configuración para VS Code (puede variar según tu editor)
+.vscode/
+
+.env
+.env.prod
+.env.dev
