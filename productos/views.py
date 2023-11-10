@@ -1,7 +1,7 @@
 # Create your views here.
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework.request import Request
 from inventario.models import AdquisicionInventario, Inventario
@@ -11,7 +11,7 @@ from .models import Marca, Categoria, TemporadaEvento, Producto
 from .serializers import IngresarProductoEInventarioSerializer, MarcaSerializer, CategoriaSerializer, TemporadaEventoSerializer, ProductoSerializer
 
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from main.permissions import IsStaffUser
 
 class MarcaViewSet(viewsets.ModelViewSet):
     queryset = Marca.objects.all()
@@ -26,14 +26,29 @@ class MarcaViewSet(viewsets.ModelViewSet):
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
+    
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [IsStaffUser()]
+        return []
 
 class TemporadaEventoViewSet(viewsets.ModelViewSet):
     queryset = TemporadaEvento.objects.all()
     serializer_class = TemporadaEventoSerializer
+    
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [IsStaffUser()]
+        return []
 
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
+    
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [IsStaffUser()]
+        return []
     
     def get_queryset(self):
         # Aquí puedes personalizar tu consulta utilizando select_related y prefetch_related
@@ -41,6 +56,11 @@ class ProductoViewSet(viewsets.ModelViewSet):
 
 class ProductoInventarioView(APIView):
     parser_classes = [MultiPartParser, FormParser]
+    
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [IsStaffUser()]
+        return []
 
     def post(self, request):
         serializer = IngresarProductoEInventarioSerializer(data=request.data)
@@ -100,7 +120,6 @@ class ProductoInventarioView(APIView):
         else:
             return Response({'error': 'Se requiere un ID de producto válido en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
     
-
 
 def paginar_productos(request, page):
     productos = Producto.objects.order_by('id_producto')  # Ordena por el índice autoincremental

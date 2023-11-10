@@ -28,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["44.207.70.246", "ec2-44-207-70-246.compute-1.amazonaws.com", "localhost"]
 
 
 # Application definition
@@ -72,6 +72,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+X_FRAME_OPTIONS = 'DENY'
+
 ROOT_URLCONF = 'main.urls'
 
 TEMPLATES = [
@@ -107,12 +109,6 @@ DATABASES = {
     }
 }
 
-# Establecer la conexión a MySQL utilizando pymysql
-import pymysql
-
-pymysql.install_as_MySQLdb()    
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -147,7 +143,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = []
 MEDIA_URL = '/media/'
@@ -162,6 +158,9 @@ AUTH_USER_MODEL = 'usuarios.User'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://yourspace-tienda.netlify.app",
+    "http://yourspace.eak-dev.com",
+
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -176,9 +175,9 @@ CORS_ALLOW_METHODS = (
 )
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS' : True ,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS' : True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
    
@@ -197,6 +196,7 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+    
     
     'JTI_CLAIM': 'jti',
 }
