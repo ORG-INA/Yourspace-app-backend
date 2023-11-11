@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["44.207.70.246", "ec2-44-207-70-246.compute-1.amazonaws.com", "localhost"]
+ALLOWED_HOSTS = ["44.207.70.246", "ec2-44-207-70-246.compute-1.amazonaws.com", "localhost", "127.0.0.1", "fl0.com","app.fl0.com"]
 
 
 # Application definition
@@ -109,6 +109,7 @@ DATABASES = {
     }
 }
 
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -159,8 +160,8 @@ AUTH_USER_MODEL = 'usuarios.User'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://yourspace-tienda.netlify.app",
+    "https://yourspace.eak-dev.com",
     "http://yourspace.eak-dev.com",
-
 ]
 
 CORS_ALLOW_CREDENTIALS = True
