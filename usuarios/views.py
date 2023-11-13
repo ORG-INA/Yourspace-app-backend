@@ -1,16 +1,17 @@
+from datetime import datetime
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework import status
-from rest_framework_simplejwt.tokens import UntypedToken, RefreshToken
+from rest_framework_simplejwt.tokens import UntypedToken, Token
 from rest_framework_simplejwt.views import TokenVerifyView, TokenRefreshView, TokenViewBase
 from rest_framework.views import APIView
 
 
 from . models import User
-from . serializers import RegisterUserSerializer, MyTokenObtainPairSerializer, CustomTokenRefreshSerializer, CustomTokenBlacklistSerializer
+from . serializers import CombinedTokenSerializer, RegisterUserSerializer, MyTokenObtainPairSerializer, CustomTokenRefreshSerializer, CustomTokenBlacklistSerializer
 
 
 @api_view(['POST'])
@@ -37,8 +38,8 @@ class LoginView(TokenObtainPairView):
         if response.status_code == 200:
             token = response.data.get('access', None)
             refresh = response.data.get('refresh', None)
-            response.set_cookie('token', str(token), httponly=True, samesite='Strict', secure=True, path='/', expires=900)
-            response.set_cookie('refresh', str(refresh), httponly=True, samesite='Strict', secure=True, path='/', expires=604800)
+            response.set_cookie('token', str(token), httponly=True, samesite='None', secure=True, path='/', expires=900)
+            response.set_cookie('refresh', str(refresh), httponly=True, samesite='None', secure=True, path='/', expires=604800)
 
         return response
     
@@ -76,13 +77,37 @@ class CustomTokenRefreshView(TokenViewBase):
             
             if token and refresh:
                 # Actualiza las cookies con los nuevos tokens de acceso y refresco
-                response.set_cookie('token', str(token), httponly=True, samesite='Strict', secure=True, path='/', expires=900)
-                response.set_cookie('refresh', str(refresh), httponly=True, samesite='Strict', secure=True, path='/', expires=604800)
+                response.set_cookie('token', str(token), httponly=True, samesite='None', secure=True, path='/', expires=900)
+                response.set_cookie('refresh', str(refresh), httponly=True, samesite='None', secure=True, path='/', expires=604800)
             else:
                 # Maneja el caso en el que no se proporcionen los nuevos tokens
                 return Response({"detail": "Failed to refresh tokens"}, status=status.HTTP_400_BAD_REQUEST)
 
         return response
+    
+class CustomTokenVerifyAndRefreshView(TokenViewBase):
+    serializer_class = CombinedTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        print("response status: ", response.status_code)
+        # print("response data: ", response.data)
+        if response.status_code >= 200 and response.status_code < 300:
+            token = response.data.get('access')
+            refresh = response.data.get('refresh')
+            accessJwt = UntypedToken(token).payload
+            refreshJwt = UntypedToken(refresh).payload
+            accessExp = datetime.utcfromtimestamp(accessJwt.get('exp'))
+            print("accessExp", accessExp)
+            refreshExp = datetime.utcfromtimestamp(refreshJwt.get('exp'))
+            if token and refresh:
+                # Actualiza las cookies con los nuevos tokens de acceso y refresco
+                response.set_cookie('token', str(token), httponly=True, samesite='Strict', secure=True, path='/', expires=accessExp)
+                response.set_cookie('refresh', str(refresh), httponly=True, samesite='Strict', secure=True, path='/', expires=refreshExp)
+                return Response({"isValid": True, "isStaff":accessJwt.get('is_staff')}, status=status.HTTP_200_OK)
+            else:
+                # Maneja el caso en el que no se proporcionen los nuevos tokens
+                return Response({"detail": "Failed to refresh tokens"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(TokenViewBase):
     serializer_class=CustomTokenBlacklistSerializer
@@ -101,3 +126,6 @@ class LogoutView(TokenViewBase):
             return Response({"message": "Failed to blacklist the token"}, status=status.HTTP_400_BAD_REQUEST)
 
         return response
+    
+
+    

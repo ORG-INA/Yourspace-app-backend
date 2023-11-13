@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["44.207.70.246", "ec2-44-207-70-246.compute-1.amazonaws.com", "localhost", "127.0.0.1", "fl0.com","app.fl0.com"]
+ALLOWED_HOSTS = ["44.207.70.246", "ec2-44-207-70-246.compute-1.amazonaws.com", "localhost", "api-ys.eak-dev.com"]
 
 
 # Application definition
@@ -176,7 +176,7 @@ CORS_ALLOW_METHODS = (
 )
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS' : True,
     'BLACKLIST_AFTER_ROTATION': True,
