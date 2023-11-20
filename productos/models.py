@@ -33,7 +33,7 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     descuento = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     imagen = CloudinaryField('image', null=True, blank=True)
-    marca = models.ForeignKey(Marca, null=True, blank=True, on_delete=models.SET_NULL)
+    marca = models.ForeignKey(Marca, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     categorias = models.ManyToManyField(Categoria)
     temporadas_evento = models.ManyToManyField(TemporadaEvento, related_name='productos', blank=True)
     update_at = models.DateTimeField(auto_now=True, null=True)

@@ -1,6 +1,7 @@
 # Create your views here.
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -98,27 +99,29 @@ class ProductoInventarioView(APIView):
     
     def put(self, request):
    
-        print(request.data)
-        id_producto = request.data.get('id_producto')
-
-        if id_producto:
-            try:
-                producto = Producto.objects.get(pk=id_producto)
-                # Realiza la actualización del producto aquí
-                # Asegúrate de usar el serializer para validar y actualizar los datos.
-                serializer = IngresarProductoEInventarioSerializer(producto, data=request.data)
-                if serializer.is_valid():
-                    serializer.save()
-                    inventario = Inventario.objects.get(pk=request.data.get('id_inventario'))
-                    inventario.cantidad_disponible = serializer.validated_data['cantidad']
-                    inventario.save()
-                    print(inventario.cantidad_disponible)
-                    return Response({'message': 'Producto actualizado exitosamente'}, status=status.HTTP_200_OK)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            except Producto.DoesNotExist:
-                return Response({'error': 'El producto no existe'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'error': 'Se requiere un ID de producto válido en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            id_producto = request.data.get('id_producto')
+            if id_producto:
+                try:
+                    producto = Producto.objects.get(pk=id_producto)
+                    # Realiza la actualización del producto aquí
+                    # Asegúrate de usar el serializer para validar y actualizar los datos.
+                    serializer = IngresarProductoEInventarioSerializer(producto, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        inventario = Inventario.objects.get(pk=request.data.get('id_inventario'))
+                        inventario.cantidad_disponible = serializer.validated_data['cantidad']
+                        inventario.save()
+                        print(inventario.cantidad_disponible)
+                        return Response({'message': 'Producto actualizado exitosamente'}, status=status.HTTP_200_OK)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                except Producto.DoesNotExist:
+                    return Response({'error': 'El producto no existe'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({'error': 'Se requiere un ID de producto válido en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     
 
 def paginar_productos(request, page):
@@ -135,3 +138,44 @@ def paginar_productos(request, page):
     serialized_data = [{'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': p.precio} for p in page_data]
 
     return JsonResponse({'productos': serialized_data})
+
+def filtrar_productos(request, marca, categoria, temporada):
+    # Maneja el valor "null" o "undefined" como None
+    if marca.lower() == "null" or marca.lower() == "undefined":
+        marca = None
+    if categoria.lower() == "null" or categoria.lower() == "undefined":
+        categoria = None
+    if temporada.lower() == "null" or temporada.lower() == "undefined":
+        temporada = None
+
+    # Construir un diccionario con los parámetros que se proporcionaron
+    filtros = {}
+
+    if marca:
+        marca_obj = get_object_or_404(Marca, nombre_marca=marca)
+        filtros['marca'] = marca_obj
+    
+    if categoria:
+        # Cambiar get_object_or_404 por filter
+        categoria_objs = Categoria.objects.filter(nombre_categoria=categoria.capitalize())
+        filtros['categorias__in'] = categoria_objs
+    
+    if temporada:
+        # Cambiar get_object_or_404 por filter
+        temporada_objs = TemporadaEvento.objects.filter(nombre=temporada)
+        filtros['temporadas_evento__in'] = temporada_objs
+
+    print(filtros)
+    
+    if filtros.get('marca') is None and filtros.get('categorias__in') is None and filtros.get('temporadas_evento__in') is None:
+        return JsonResponse({'productos': ProductoSerializer(Producto.objects.all(), many=True).data})
+
+    # Realiza la consulta para obtener los productos que cumplen con los filtros
+    productos_filtrados = Producto.objects.filter(**filtros)
+    print(productos_filtrados)
+    # Utiliza el serializer para convertir los resultados a JSON
+    serializer = ProductoSerializer(productos_filtrados, many=True)
+    productos_serializados = serializer.data
+
+    # Puedes hacer lo que necesites con los productos_filtrados, como renderizarlos en un template
+    return JsonResponse({'productos': productos_serializados})

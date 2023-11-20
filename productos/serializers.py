@@ -40,6 +40,8 @@ class IngresarProductoEInventarioSerializer(serializers.Serializer):
     fecha = serializers.DateTimeField(required=False, default=datetime.datetime.now())
     
     def update(self, instance, validated_data):
+        print("update", instance, validated_data)
+        
         # Actualiza los campos del objeto instance con los datos validados
         instance.nombre = validated_data.get('nombre', instance.nombre)
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
@@ -51,5 +53,5 @@ class IngresarProductoEInventarioSerializer(serializers.Serializer):
         instance.categorias.set(validated_data.get('categorias', instance.categorias.all()))
         instance.temporadas_evento.set(validated_data.get('temporadas_evento', instance.temporadas_evento.all()))
         instance.save()  # Guarda los cambios en la base de datos
-
+        
         return instance
