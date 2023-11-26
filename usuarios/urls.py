@@ -9,3 +9,4 @@ urlpatterns = [
     path('token/verifyAndRefresh/', views.CustomTokenVerifyAndRefreshView.as_view(), name='token_verify_and_refresh'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
 ]
+# He aqui
