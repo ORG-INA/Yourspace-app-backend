@@ -126,7 +126,7 @@ class ProductoInventarioView(APIView):
 
 def paginar_productos(request, page):
     productos = Producto.objects.order_by('id_producto')  # Ordena por el índice autoincremental
-    paginator = Paginator(productos, 10)  # Divide en páginas de 10 elementos
+    paginator = Paginator(productos, 5)  # Divide en páginas de 10 elementos
 
     try:
         page = int(page)
@@ -135,7 +135,7 @@ def paginar_productos(request, page):
 
     page_data = paginator.get_page(page)
     
-    serialized_data = [{'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': p.precio} for p in page_data]
+    serialized_data = [{'id_producto': p.id_producto, 'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': p.precio, 'descuento': p.descuento} for p in page_data]
 
     return JsonResponse({'productos': serialized_data})
 
