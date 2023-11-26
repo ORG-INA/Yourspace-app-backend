@@ -7,7 +7,7 @@ from .views import ApiRoot
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/", ApiRoot.as_view(), name='api-root'),
+    # path("api/", ApiRoot.as_view(), name='api-root'),
     path('api/products/', include('productos.urls')),
     path('api/purchases/', include('compras.urls')),
     path('api/inventory/', include('inventario.urls')),
