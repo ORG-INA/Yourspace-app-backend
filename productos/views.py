@@ -139,6 +139,24 @@ def paginar_productos(request, page):
 
     return JsonResponse({'productos': serialized_data})
 
+def get_object_by_id_or_name(model, value):
+    if value.isdigit():
+        return get_object_or_404(model, pk=value)
+    else:
+        try:
+            # Verificar si el modelo tiene un campo 'nombre'
+            if hasattr(model, 'nombre'):
+                return get_object_or_404(model, nombre=value)
+            # Verificar si el modelo tiene un campo 'nombre_marca'
+            elif hasattr(model, 'nombre_marca'):
+                return get_object_or_404(model, nombre_marca=value)
+            # Verificar si el modelo tiene un campo 'nombre_categoria'
+            elif hasattr(model, 'nombre_categoria'):
+                return get_object_or_404(model, nombre_categoria=value)
+        except model.DoesNotExist:
+            return None  # Manejar el caso en que no se encuentre el objeto
+
+
 def filtrar_productos(request, marca, categoria, temporada):
     # Maneja el valor "null" o "undefined" como None
     if marca.lower() == "null" or marca.lower() == "undefined":
@@ -152,18 +170,18 @@ def filtrar_productos(request, marca, categoria, temporada):
     filtros = {}
 
     if marca:
-        marca_obj = get_object_or_404(Marca, nombre_marca=marca)
+        marca_obj = get_object_by_id_or_name(Marca, marca.capitalize())
         filtros['marca'] = marca_obj
     
     if categoria:
         # Cambiar get_object_or_404 por filter
-        categoria_objs = Categoria.objects.filter(nombre_categoria=categoria.capitalize())
-        filtros['categorias__in'] = categoria_objs
+        categoria_objs = get_object_by_id_or_name(Categoria, categoria.capitalize())
+        filtros['categorias__in'] = [categoria_objs]
     
     if temporada:
         # Cambiar get_object_or_404 por filter
-        temporada_objs = TemporadaEvento.objects.filter(nombre=temporada)
-        filtros['temporadas_evento__in'] = temporada_objs
+        temporada_objs = get_object_by_id_or_name(TemporadaEvento, temporada)
+        filtros['temporadas_evento__in'] = [temporada_objs]
 
     print(filtros)
     
