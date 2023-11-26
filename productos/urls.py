@@ -7,7 +7,7 @@ from .views import ProductoInventarioView, MarcaViewSet, CategoriaViewSet, Tempo
 
 urlpatterns = [
     path('inventario/nuevo/', ProductoInventarioView.as_view(), name='producto e inventario'),
-    path('pagina/<int:page>/', views.paginar_productos, name='productos'),
+    path('pagina/<int:page>/', views.paginar_productos, name='productos por pagina'),
     path('filtro/<str:marca>/<str:categoria>/<str:temporada>/', views.filtrar_productos, name='productos filtrados'),
 ]
 
