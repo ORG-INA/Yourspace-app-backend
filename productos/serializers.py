@@ -40,7 +40,7 @@ class IngresarProductoEInventarioSerializer(serializers.Serializer):
     fecha = serializers.DateTimeField(required=False, default=datetime.datetime.now())
     
     def update(self, instance, validated_data):
-        print("update", instance, validated_data)
+        # print("update", instance, validated_data)
         
         # Actualiza los campos del objeto instance con los datos validados
         instance.nombre = validated_data.get('nombre', instance.nombre)
